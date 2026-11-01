@@ -62,6 +62,8 @@ Open <http://localhost:8484> and sign in. The hub maps its own host right away t
 
 Want to look around first? Set `SERVCHART_DEMO: "1"` in `docker-compose.yml` to load three fictional demo hosts.
 
+On the map, use **Search** to highlight matching containers. Press **Enter** to jump to the first match, then press Enter again to cycle through the matches.
+
 ## Add another host
 
 In the map, click **+ Add host**, give it a name, and run the command it shows on that host:

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Search navigation:** Press Enter in the search box to focus the next matching container on the map, wrapping back to the first result.
+
 ## 0.4.2
 
 - **Fix:** on a fresh visit the map could stay zoomed in on the first server instead of fitting everything on screen; it now fits once the cards have been measured.

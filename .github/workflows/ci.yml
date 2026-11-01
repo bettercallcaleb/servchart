@@ -60,6 +60,7 @@ jobs:
         working-directory: web
         run: |
           npm install
+          npm test
           npm run build
 
   images:
