@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Background, Controls, MarkerType, MiniMap, ReactFlow, ReactFlowProvider, applyNodeChanges, useNodesInitialized, useReactFlow } from "@xyflow/react";
 import { api } from "./api.js";
 import { filterEdges, layoutGraph, relatedTo } from "./layout.js";
+import { nextSearchMatch } from "./searchNavigation.js";
 import { routeEdges } from "./routing.js";
 import { nodeTypes } from "./components/nodes.jsx";
 import { edgeTypes } from "./components/edges.jsx";
@@ -75,6 +76,7 @@ function MapView() {
   const [hoverEdge, setHoverEdge] = useState(null);
   const [hoverNode, setHoverNode] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
+  const searchCursor = useRef(null);
   const [dialog, setDialog] = useState(null); // {mode:'add'} | {mode:'rotate', host}
   const [view, setView] = useState(() => (window.location.hash === "#settings" ? "settings" : "map"));
   const [settingsRev, setSettingsRev] = useState(0); // remounts Settings after the add-host dialog
@@ -134,6 +136,16 @@ function MapView() {
     for (const c of changes) if (c.type === "position" && c.position) dragged.current[c.id] = c.position;
     setNodes((ns) => applyNodeChanges(changes, ns));
   }, []);
+
+  const navigateSearch = (event) => {
+    if (event.key !== "Enter" || event.nativeEvent?.isComposing) return;
+    const nextId = nextSearchMatch(laid.nodes, searchCursor.current, query);
+    if (!nextId) return;
+    event.preventDefault();
+    searchCursor.current = nextId;
+    setSelectedId(nextId);
+    fitView({ nodes: [{ id: nextId }], duration: 300, maxZoom: 1.2 });
+  };
 
   const names = useMemo(() => new Map((graph?.nodes || []).map((n) => [n.id, n.data?.name || n.id])), [graph]);
 
@@ -217,7 +229,7 @@ function MapView() {
           {hosts.length} hosts · {totals.s} stacks · {totals.r}/{totals.c} containers running
         </div>
         <div className="toolbar">
-          <input className="search" type="search" placeholder="Search name, image, stack, folder, port…" value={query} onChange={(e) => setQuery(e.target.value)} />
+          <input className="search" type="search" aria-label="Search containers" placeholder="Search name, image, stack, folder, port…" value={query} onChange={(e) => { searchCursor.current = null; setQuery(e.target.value); }} onKeyDown={navigateSearch} />
           <select value={hostFilter} onChange={(e) => setHostFilter(e.target.value)} aria-label="Host">
             <option value="all">All hosts</option>
             {hosts.map((h) => (
